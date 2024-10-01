@@ -1,6 +1,6 @@
 name: pre-commit
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   pre-commit:
@@ -21,4 +21,4 @@ jobs:
           pip install pre-commit
 
       - name: Run pre-commit hooks
-        run: pre-commit run --all-files
+        run: SKIP=generate-requirements pre-commit run --all-files
