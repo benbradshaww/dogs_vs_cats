@@ -3,3 +3,16 @@ data/
 
 # Virtual Environments
 myenv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pre-commit cache
+.cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# DS Store
+.DS_Store
