@@ -52,10 +52,3 @@ repos:
     hooks:
       - id: mypy
         description: Static type checker
-  - repo: local
-    hooks:
-      - id: generate-requirements
-        name: generate requirements.txt
-        entry: bash -c 'pip freeze > requirements.txt'
-        language: system
-        description: Generate requirements.txt

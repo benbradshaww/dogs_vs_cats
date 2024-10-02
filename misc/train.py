@@ -43,6 +43,7 @@ def train_model(
     best_loss = float("inf")
     start_time = time.time()
     criterion = torch.nn.BCELoss()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     for epoch in range(epochs):
         epoch_start_time = time.time()
@@ -51,13 +52,13 @@ def train_model(
         outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1, 2)
         counter, running_loss = 0, 0
         for batch in tqdm(train_loader):
-            features = batch[0]
-            labels = batch[1]
+            images, labels = batch[0], batch[1]
+            images, labels = images.to(device), labels.to(device)
             counter += 1
 
             optimizer.zero_grad()
 
-            outputs = model(features)
+            outputs = model(images)
 
             loss_train = criterion(outputs, labels)
 
@@ -76,11 +77,11 @@ def train_model(
         counter, running_loss = 0, 0
         with torch.no_grad():
             for batch in val_loader:
-                features = batch[0]
-                labels = batch[1]
+                images, labels = batch[0], batch[1]
+                images, labels = images.to(device), labels.to(device)
                 counter += 1
 
-                outputs = model(features)
+                outputs = model(images)
 
                 outputs_tensor = torch.cat((outputs_tensor, outputs), dim=0)
                 labels_tensor = torch.cat((labels_tensor, labels), dim=0)
@@ -141,16 +142,18 @@ def train_model(
 
 def test_model(model, test_loader):
     model.eval()
-    outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1)
+    outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1, 2)
     counter, running_loss = 0, 0
     criterion = torch.nn.BCELoss()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     with torch.no_grad():
         for batch in test_loader:
-            labels = batch.y.squeeze().long()
+            images, labels = batch[0], batch[1]
+            images, labels = images.to(device), labels.to(device)
             counter += 1
 
-            outputs = model(batch)
+            outputs = model(images)
 
             outputs_tensor = torch.cat((outputs_tensor, outputs), dim=0)
             labels_tensor = torch.cat((labels_tensor, labels), dim=0)

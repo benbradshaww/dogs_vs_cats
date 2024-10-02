@@ -138,6 +138,22 @@ class efficient_net_b0(nn.Module):
             bias=True,
         )
 
+        self.mb_convs = nn.ModuleList(
+            [
+                MBConv(
+                    input_channels=self.input_channels[i],
+                    output_channels=self.output_channels[i],
+                    kernel_size=self.kernel_sizes[i],
+                    expansion_ratio=6,
+                    stride=self.strides[i],
+                    padding=self.kernel_sizes[i] // 2,
+                    squeeze=True,
+                    reduction_rate=16,
+                )
+                for i in range(self.depth)
+            ]
+        )
+
         self.final_conv = Conv2d(
             in_channels=self.output_channels[-1],
             out_channels=1280,
@@ -158,17 +174,7 @@ class efficient_net_b0(nn.Module):
         x = self.basic_conv(x)
 
         for i in range(self.depth):
-            mb_conv = MBConv(
-                input_channels=self.input_channels[i],
-                output_channels=self.output_channels[i],
-                kernel_size=self.kernel_sizes[i],
-                expansion_ratio=6,
-                stride=self.strides[i],
-                padding=self.kernel_sizes[i] // 2,
-                squeeze=True,
-                reduction_rate=16,
-            )
-            x = mb_conv(x)
+            x = self.mb_convs[i](x)
 
         x = self.final_conv(x)
         x = self.final_norm(x)

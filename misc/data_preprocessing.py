@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset, Subset, random_split
 from torchvision import transforms
 
 
@@ -95,31 +95,45 @@ def download_data(path):
         print("Data downloaded and unzipped to:", path)
 
 
-def create_dataloaders():
-    transform = transforms.Compose(
+def create_dataloaders(train_directory_path: str, test_directory_path: str, batch_size: int = 2):
+    train_transform = transforms.Compose(
         [
-            transforms.Resize((512, 512), interpolation=Image.LANCZOS),
-            transforms.ToTensor(),
-            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.Resize((224, 224), interpolation=Image.LANCZOS),
+            transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(degrees=45),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
 
-    train_directory_path = "./data/training_set/training_set/"
-    test_directory_path = "./data/test_set/test_set/"
+    test_and_val_transform = transforms.Compose(
+        [
+            transforms.Resize((224, 224), interpolation=Image.LANCZOS),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
-    full_dataset = CustomImageDataset(directory_path=train_directory_path, transform=transform)
-    test_dataset = CustomImageDataset(directory_path=test_directory_path, transform=None)
+    # train_directory_path = "./data/training_set/training_set/"
+    # test_directory_path = "./data/test_set/test_set/"
 
-    train_size = int(0.8 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
+    train_dataset = CustomImageDataset(directory_path=train_directory_path, transform=train_transform)
+    val_dataset = CustomImageDataset(directory_path=train_directory_path, transform=test_and_val_transform)
+    test_dataset = CustomImageDataset(directory_path=test_directory_path, transform=test_and_val_transform)
 
-    train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
+    train_size = int(0.8 * len(train_dataset))
+    val_size = len(train_dataset) - train_size
+
+    train_indices, val_indices = random_split(train_dataset, [train_size, val_size])
+
+    train_dataset, _ = Subset(train_dataset, train_indices)
+    _, val_dataset = Subset(val_dataset, val_indices)
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=2, shuffle=True, num_workers=1)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=2, shuffle=True, num_workers=1)
+    val_loader = DataLoader(dataset=val_dataset, batch_size=2, shuffle=False, num_workers=1)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=2, shuffle=False, num_workers=1)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, test_loader
 
 
 def get_dataloader_example(data_loader):
