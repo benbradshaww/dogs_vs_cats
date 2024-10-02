@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset, Subset, random_split
+from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import transforms
 
 
@@ -95,7 +95,7 @@ def download_data(path):
         print("Data downloaded and unzipped to:", path)
 
 
-def create_dataloaders(train_directory_path: str, test_directory_path: str, batch_size: int = 2):
+def create_dataloaders(train_directory_path: str, test_directory_path: str, batch_size: int = 32, split: float = 0.8):
     train_transform = transforms.Compose(
         [
             transforms.Resize((224, 224), interpolation=Image.LANCZOS),
@@ -114,20 +114,15 @@ def create_dataloaders(train_directory_path: str, test_directory_path: str, batc
         ]
     )
 
-    # train_directory_path = "./data/training_set/training_set/"
-    # test_directory_path = "./data/test_set/test_set/"
-
     train_dataset = CustomImageDataset(directory_path=train_directory_path, transform=train_transform)
     val_dataset = CustomImageDataset(directory_path=train_directory_path, transform=test_and_val_transform)
     test_dataset = CustomImageDataset(directory_path=test_directory_path, transform=test_and_val_transform)
 
-    train_size = int(0.8 * len(train_dataset))
+    train_size = int(split * len(train_dataset))
     val_size = len(train_dataset) - train_size
 
-    train_indices, val_indices = random_split(train_dataset, [train_size, val_size])
-
-    train_dataset, _ = Subset(train_dataset, train_indices)
-    _, val_dataset = Subset(val_dataset, val_indices)
+    train_dataset, _ = random_split(train_dataset, [train_size, val_size])
+    _, val_dataset = random_split(val_dataset, [train_size, val_size])
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=2, shuffle=True, num_workers=1)
     val_loader = DataLoader(dataset=val_dataset, batch_size=2, shuffle=False, num_workers=1)
