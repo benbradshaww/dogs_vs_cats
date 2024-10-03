@@ -17,17 +17,25 @@ This repository contains a deep learning model for classifying images of dogs an
 
 ## Project Overview
 
-This project uses the EfficientNet-B0 model to classify images of dogs and cats. EfficientNet is a state-of-the-art CNN architecture that achieves high accuracy with fewer parameters than traditional models. This project demonstrates how transfer learning can be applied to classify the Dogs vs Cats dataset.
+This project will implement my own version of the EfficientNet-B0 model to classify dog and cat images.
+For more details on the model I implemented. Please visit: https://arxiv.org/pdf/1905.11946.
+
+The goal of this project is to improve my skills with:
+* Creating Pytorch vision models.
+* ML training pipelines.
+* Implementations of pre-commits (some custom made).
+* Employing github actions.
+* Learn about training on virutal GPUs.
 
 ## Dataset
 
-The dataset used in this project is the Dogs vs Cats dataset, which contains 25,000 labeled images of dogs and cats. You can download the dataset from Kaggle.
+The dataset used in this project is the Dogs vs Cats dataset, which contains 8000 labeled images of dogs and cats for training.
+You can download the dataset from Kaggle. The instructions will be provided below.
 
 ## Data Structure:
 
 ## Model Architecture
 
-The model is based on EfficientNet-B0, which is a highly efficient convolutional neural network optimized for performance and speed. The model uses transfer learning to leverage pre-trained weights from ImageNet and fine-tunes them on the Dogs vs Cats dataset.
 
 Key Features:
 
@@ -60,7 +68,7 @@ pip install -r requirements.txt
 - Download the dataset from [Kaggle](https://www.kaggle.com/c/dogs-vs-cats/data).
 - Unzip it and place the files into a `data/` directory as shown in the **Data Structure** section.
 
-Alternatively, if you have a valid Kaggle API, run the function `download_data` to get the necessary data.
+Alternatively, if you have a valid Kaggle API in your home folder, run the function `download_data` to get the necessary data.
 
 ## Training
 

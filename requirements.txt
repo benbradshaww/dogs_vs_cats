@@ -1,6 +1,6 @@
 kaggle
 pandas
-PIL
+pillow
 matplotlib
 torchvision
 torch

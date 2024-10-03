@@ -7,14 +7,14 @@ from tqdm import tqdm
 
 
 def accuracy(output, label):
-    preds = output.max(1)[1].type_as(label)
-    correct = preds.eq(label).double()
-    correct = correct.sum()
+    preds = output.argmax(dim=1)
+    label = label.argmax(dim=1)
+    correct = preds.eq(label).sum().item()
     return round(correct / len(label), 3)
 
 
 def precision_recall_f1(outputs, labels):
-    output_pred = outputs.max(1)[1]
+    output_pred = outputs.argmax(dim=1)
     true_positive = ((output_pred == 1) & (labels == 1)).sum().item()
     false_positive = ((output_pred == 1) & (labels == 0)).sum().item()
     false_negative = ((output_pred == 0) & (labels == 1)).sum().item()
@@ -49,7 +49,7 @@ def train_model(
         epoch_start_time = time.time()
         model.train()
 
-        outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1, 2)
+        outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
         counter, running_loss = 0, 0
         for batch in tqdm(train_loader):
             images, labels = batch[0], batch[1]
@@ -73,7 +73,7 @@ def train_model(
         train_acc = accuracy(outputs_tensor, labels_tensor)
 
         model.eval()
-        outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1)
+        outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
         counter, running_loss = 0, 0
         with torch.no_grad():
             for batch in val_loader:
@@ -142,10 +142,10 @@ def train_model(
 
 def test_model(model, test_loader):
     model.eval()
-    outputs_tensor, labels_tensor = torch.empty(1, 2), torch.empty(1, 2)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
     counter, running_loss = 0, 0
     criterion = torch.nn.BCELoss()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     with torch.no_grad():
         for batch in test_loader:

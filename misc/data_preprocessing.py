@@ -124,9 +124,9 @@ def create_dataloaders(train_directory_path: str, test_directory_path: str, batc
     train_dataset, _ = random_split(train_dataset, [train_size, val_size])
     _, val_dataset = random_split(val_dataset, [train_size, val_size])
 
-    train_loader = DataLoader(dataset=train_dataset, batch_size=2, shuffle=True, num_workers=1)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=2, shuffle=False, num_workers=1)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=2, shuffle=False, num_workers=1)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
+    val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader, test_loader
 
