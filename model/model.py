@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from torch.nn import (AdaptiveAvgPool2d, BatchNorm2d, Conv2d, Linear, Sigmoid,
                       Softmax)
@@ -117,6 +118,22 @@ class MBConv(nn.Module):
         return x
 
 
+class StochasticDepth(nn.Module):
+    def __init__(self, drop_prob: float = 0.2):
+        super(StochasticDepth, self).__init__()
+        self.drop_prob = drop_prob
+
+    def forward(self, x, layer_output):
+        if not self.training or self.drop_prob == 0:
+            return layer_output
+        else:
+            survival_prob = 1 - self.drop_prob
+            if torch.rand(1).item() < survival_prob:
+                return layer_output
+            else:
+                return x
+
+
 class efficient_net_b0(nn.Module):
 
     def __init__(self):
@@ -128,6 +145,24 @@ class efficient_net_b0(nn.Module):
         self.input_channels = [32] + self.output_channels[:-1]
         self.strides = [1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1]
         self.kernel_sizes = (3 * [3]) + (2 * [5]) + (3 * [3]) + (7 * [5]) + (1 * [3])
+        self.dropout_layers = [
+            False,
+            False,
+            True,
+            False,
+            True,
+            False,
+            True,
+            True,
+            False,
+            True,
+            True,
+            False,
+            True,
+            True,
+            True,
+            False,
+        ]
 
         self.basic_conv = Conv2d(
             in_channels=3,
@@ -154,6 +189,10 @@ class efficient_net_b0(nn.Module):
             ]
         )
 
+        self.stochastic_depths = nn.ModuleList(
+            [StochasticDepth(drop_prob=0.2 if self.dropout_layers[i] else 0.0) for i in range(self.depth)]
+        )
+
         self.final_conv = Conv2d(
             in_channels=self.output_channels[-1],
             out_channels=1280,
@@ -174,7 +213,11 @@ class efficient_net_b0(nn.Module):
         x = self.basic_conv(x)
 
         for i in range(self.depth):
-            x = self.mb_convs[i](x)
+            out = self.mb_convs[i](x)
+            if self.dropout_layers[i]:
+                x = self.stochastic_depths[i](x, out)
+            else:
+                x = out
 
         x = self.final_conv(x)
         x = self.final_norm(x)

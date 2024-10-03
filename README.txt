@@ -40,8 +40,8 @@ You can download the dataset from Kaggle. The instructions will be provided belo
 Key Features:
 
 	•	EfficientNet-B0 as the base model.
-	•	A custom classification head with a fully connected layer and softmax activation.
-	•	Data augmentations (e.g., random rotations, horizontal flips) applied to the training set.
+    •   Generic augmentation methods were applied.
+	•	Trained with a batch size 32.
 
 ## Installation
 
@@ -49,8 +49,7 @@ To set up this project locally, follow these steps:
 
 ### 1. Clone the Repository:
 ```
-git clone https://github.com/your-username/dogs-vs-cats-efficientnet.git
-cd dogs-vs-cats-efficientnet
+git clone https://github.com/benbradshaww/dogs_vs_cats.git
 ```
 ### 2. Set Up the Virtual Environment:
 ```
