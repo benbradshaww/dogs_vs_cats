@@ -31,11 +31,19 @@ You can download the dataset from Kaggle. The instructions will be provided belo
 
 Key Features:
 	•	EfficientNet-B0 as the base model.
-    •   Generic augmentation methods were applied.
+	• Generic augmentation methods were applied.
 	•   Trained on 2x RTX 3060.
 	•	Trained with a batch size 32, starting learning rate of 1e-3 which is reduced on a plateau.
 
-** Evaluation **
+** Results **
+
+The best training loss was at epoch: 143 with a training loss of 0.0198 training accuracy of 0.9942, validaiton loss of 0.0289:, validation accuracy of 0.9913.
+However the test set results had a loss of 0.1463 and accuracy of 0.9600 indicating the model overfitted to the training data. Potentially a simpler model should have been used.
+Plots of the training process can be found in the plots folder.
+
+** Next Steps **
+	• Rather than using an EfficientNet model a different architecture could be used.
+
 
 ** Installation **
 
