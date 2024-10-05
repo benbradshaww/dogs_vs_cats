@@ -21,6 +21,8 @@ The goal of this project is to improve my skills with:
 	• Implementations of pre-commits (some custom made).
 	• Employing github actions.
 	• Learn about training on virutal GPUs.
+	• Create an interface for the model's predictions.
+
 
 ** Dataset **
 
@@ -31,7 +33,7 @@ You can download the dataset from Kaggle. The instructions will be provided belo
 
 Key Features:
 	•	EfficientNet-B0 as the base model.
-	• Generic augmentation methods were applied.
+	•   Generic augmentation methods were applied.
 	•   Trained on 2x RTX 3060.
 	•	Trained with a batch size 32, starting learning rate of 1e-3 which is reduced on a plateau.
 
