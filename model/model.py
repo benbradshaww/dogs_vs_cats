@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.nn import (AdaptiveAvgPool2d, BatchNorm2d, Conv2d, Linear, Sigmoid,
-                      Softmax)
+from torch.nn import AdaptiveAvgPool2d, BatchNorm2d, Conv2d, Linear, Sigmoid
 
 
 class SE(nn.Module):
@@ -148,19 +147,19 @@ class efficient_net_b0(nn.Module):
         self.dropout_layers = [
             False,
             False,
-            True,
             False,
-            True,
             False,
-            True,
-            True,
             False,
-            True,
-            True,
             False,
-            True,
-            True,
-            True,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
+            False,
             False,
         ]
 
@@ -206,7 +205,7 @@ class efficient_net_b0(nn.Module):
 
         self.fc = Linear(in_features=1280, out_features=self.num_classes, bias=False)
 
-        self.softmax = Softmax()
+        self.sigmoid = Sigmoid()
 
     def forward(self, x):
 
@@ -226,6 +225,6 @@ class efficient_net_b0(nn.Module):
         x = x.view(x.size(0), -1)
 
         x = self.fc(x)
-        x = self.softmax(x)
+        x = self.sigmoid(x)
 
         return x

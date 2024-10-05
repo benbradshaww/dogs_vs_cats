@@ -13,20 +13,6 @@ def accuracy(output, label):
     return round(correct / len(label), 3)
 
 
-def precision_recall_f1(outputs, labels):
-    output_pred = outputs.argmax(dim=1)
-    true_positive = ((output_pred == 1) & (labels == 1)).sum().item()
-    false_positive = ((output_pred == 1) & (labels == 0)).sum().item()
-    false_negative = ((output_pred == 0) & (labels == 1)).sum().item()
-
-    precision = true_positive / (true_positive + false_positive + 1e-10)
-    recall = true_positive / (true_positive + false_negative + 1e-10)
-
-    f1_val = 2 * (precision * recall) / (precision + recall + 1e-10)
-
-    return precision, recall, f1_val
-
-
 def train_model(
     model,
     optimizer,
@@ -46,11 +32,15 @@ def train_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     for epoch in range(epochs):
+
         epoch_start_time = time.time()
         model.train()
 
-        outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
-        counter, running_loss = 0, 0
+        counter = 0
+        running_loss = 0
+        total_samples = 0
+        running_corrects = 0
+
         for batch in tqdm(train_loader):
             images, labels = batch[0], batch[1]
             images, labels = images.to(device), labels.to(device)
@@ -62,19 +52,28 @@ def train_model(
 
             loss_train = criterion(outputs, labels)
 
-            running_loss += loss_train
-            outputs_tensor = torch.cat((outputs_tensor, outputs), dim=0)
-            labels_tensor = torch.cat((labels_tensor, labels), dim=0)
+            running_loss += loss_train.item()
+
+            preds = outputs.argmax(1)
+            labels_1_dim = labels.argmax(1)
+
+            running_corrects += torch.sum(preds == labels_1_dim).item()
+            total_samples += labels.size(0)
 
             loss_train.backward()
             optimizer.step()
 
         train_loss = running_loss / counter
-        train_acc = accuracy(outputs_tensor, labels_tensor)
+        train_acc = running_corrects / total_samples
+
+        # Validation
 
         model.eval()
-        outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
-        counter, running_loss = 0, 0
+        counter = 0
+        running_loss = 0
+        total_samples = 0
+        running_corrects = 0
+
         with torch.no_grad():
             for batch in val_loader:
                 images, labels = batch[0], batch[1]
@@ -83,13 +82,16 @@ def train_model(
 
                 outputs = model(images)
 
-                outputs_tensor = torch.cat((outputs_tensor, outputs), dim=0)
-                labels_tensor = torch.cat((labels_tensor, labels), dim=0)
+                running_loss += criterion(outputs, labels).item()
 
-                running_loss += criterion(outputs, labels)
+                preds = outputs.argmax(1)
+                labels_1_dim = labels.argmax(1)
+
+                running_corrects += torch.sum(preds == labels_1_dim).item()
+                total_samples += labels.size(0)
 
         val_loss = running_loss / counter
-        val_acc = accuracy(outputs_tensor, labels_tensor)
+        val_acc = running_corrects / total_samples
 
         # Changing step sizes
         current_lr = optimizer.param_groups[0]["lr"]
@@ -99,6 +101,7 @@ def train_model(
             print(f"Epoch {epoch}: Learning rate reduced from {current_lr} to {new_lr}")
 
         # Early stopping criterion
+        val_loss = val_loss
         if val_loss < best_loss - threshold:
             best_loss = val_loss
             best_model_state = model.state_dict()
@@ -120,6 +123,7 @@ def train_model(
         )
 
         history_path = "./history/history.csv"
+        os.makedirs("./history", exist_ok=True)
         if epoch == 0 and os.path.isfile(history_path):
             os.remove(history_path)
             new_row.to_csv(history_path, mode="a", header=True, index=False)
@@ -141,11 +145,15 @@ def train_model(
 
 
 def test_model(model, test_loader):
+
     model.eval()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    outputs_tensor, labels_tensor = torch.empty(1, 2).to(device), torch.empty(1, 2).to(device)
-    counter, running_loss = 0, 0
     criterion = torch.nn.BCELoss()
+
+    counter = 0
+    running_loss = 0
+    total_samples = 0
+    running_corrects = 0
 
     with torch.no_grad():
         for batch in test_loader:
@@ -155,21 +163,15 @@ def test_model(model, test_loader):
 
             outputs = model(images)
 
-            outputs_tensor = torch.cat((outputs_tensor, outputs), dim=0)
-            labels_tensor = torch.cat((labels_tensor, labels), dim=0)
+            preds = outputs.argmax(1)
+            label_1_dim = labels.argmax(1)
+
+            running_corrects += torch.sum(preds == label_1_dim).item()
+            total_samples += labels.size(0)
 
             running_loss += criterion(outputs, labels)
 
-    test_loss = criterion(outputs, labels)
-    test_acc = accuracy(outputs_tensor, labels_tensor)
-    test_precision, test_recall, test_f1 = precision_recall_f1(outputs_tensor, labels_tensor)
+    test_loss = running_loss / counter
+    test_acc = running_corrects / total_samples
 
-    # f1_test = f1_metric(outputs, labels)
-    print(
-        "Test set results:",
-        "loss= {:.4f}".format(test_loss),
-        "accuracy= {:.4f}".format(test_acc),
-        "recall= {:.4f}".format(test_recall),
-        "precision= {:.4f}".format(test_precision),
-        "f1= {:.4f}".format(test_f1),
-    )
+    print("Test set results:", "loss= {:.4f}".format(test_loss), "accuracy= {:.4f}".format(test_acc))
