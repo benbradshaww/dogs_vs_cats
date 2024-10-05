@@ -30,7 +30,6 @@ You can download the dataset from Kaggle. The instructions will be provided belo
 ** Training **
 
 Key Features:
-
 	•	EfficientNet-B0 as the base model.
     •   Generic augmentation methods were applied.
 	•   Trained on 2x RTX 3060.
@@ -42,11 +41,12 @@ Key Features:
 
 To set up this project locally, follow these steps:
 
-### 1. Clone the Repository:
+1. Clone the Repository:
 ```
 git clone https://github.com/benbradshaww/dogs_vs_cats.git
 ```
-### 2. Set Up the Virtual Environment:
+
+2. Set Up the Virtual Environment:
 ```
 python3 -m venv venv
 # For Mac:
@@ -54,12 +54,13 @@ source venv/bin/activate
 # For Windows:
 venv\Scripts\activate
 ```
-### 3. Install Dependencies:
+
+3. Install Dependencies:
 pip install -r requirements.txt
 
-### 4. Download the Dataset:
+4. Download the Dataset:
 
 - Download the dataset from [Kaggle](https://www.kaggle.com/c/dogs-vs-cats/data).
-- Unzip it and place the files into a `data/` directory as shown in the **Data Structure** section.
+- Unzip it and place the files into a `data/` directory.
 
 Alternatively, if you have a valid Kaggle API in your home folder, run the function `download_data` to get the necessary data.
