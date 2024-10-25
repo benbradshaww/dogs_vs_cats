@@ -7,6 +7,7 @@ myenv/
 # Python cache files
 __pycache__/
 *.py[cod]
+.mypy_cache/
 
 # Pre-commit cache
 .cache/
@@ -16,3 +17,6 @@ __pycache__/
 
 # DS Store
 .DS_Store
+
+# Ignore weights
+*.pth

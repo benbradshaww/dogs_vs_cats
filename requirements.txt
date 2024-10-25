@@ -9,3 +9,4 @@ numpy
 pandas
 kaleido
 plotly
+gradio
