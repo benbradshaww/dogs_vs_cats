@@ -45,7 +45,7 @@ I will display the loss and accuracy plots below.
 
 ![Alt Text](./images/loss_plot.png)
 
-![Alt Text](./images/accuracy.png)
+![Alt Text](./images/accuracy_plot.png)
 
 **Visualization**
 
